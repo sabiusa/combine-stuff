@@ -57,3 +57,22 @@ example(of: "Just") {
         }
     )
 }
+
+example(of: "assign(to:on:)") {
+    class Obj {
+        var value: String = "" {
+            didSet {
+                print(value)
+            }
+        }
+    }
+    
+    let obj = Obj()
+    
+    let publisher = ["Hello", "World"].publisher
+    
+    _ = publisher
+        .assign(to: \.value, on: obj)
+    
+    print(obj.value)
+}

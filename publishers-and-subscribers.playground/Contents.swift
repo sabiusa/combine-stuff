@@ -76,3 +76,21 @@ example(of: "assign(to:on:)") {
     
     print(obj.value)
 }
+
+example(of: "assign(to:)") {
+    class Obj {
+        @Published var value = -1
+    }
+    
+    let obj = Obj()
+    
+    obj.$value
+        .sink { value in
+            print(value)
+        }
+    
+    (1 ... 5).publisher
+        .assign(to: &obj.$value)
+    
+    print(obj.value)
+}

@@ -35,3 +35,25 @@ example(of: "Subscriber") {
     
     sub.cancel()
 }
+
+example(of: "Just") {
+    let just = Just("Hello")
+    
+    _ = just.sink(
+        receiveCompletion: {
+            print("Completion: ", $0)
+        },
+        receiveValue: {
+            print("Value: ", $0)
+        }
+    )
+    
+    _ = just.sink(
+        receiveCompletion: {
+            print("Completion 2: ", $0)
+        },
+        receiveValue: {
+            print("Value 2: ", $0)
+        }
+    )
+}

@@ -18,3 +18,20 @@ example(of: "Old Style") {
     
     center.removeObserver(observer)
 }
+
+example(of: "Subscriber") {
+    let notif = Notification.Name("MyNotification")
+    let center = NotificationCenter.default
+    
+    let pub = center.publisher(for: notif, object: nil)
+    
+    let sub = pub
+        .sink { value in
+            print(value)
+            print("Received from Publisher!")
+        }
+    
+    center.post(name: notif, object: nil)
+    
+    sub.cancel()
+}

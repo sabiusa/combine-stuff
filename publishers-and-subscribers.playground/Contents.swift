@@ -1,6 +1,8 @@
 import Foundation
 import Combine
 
+var subscriptions = Set<AnyCancellable>()
+
 example(of: "Old Style") {
     let notif = Notification.Name("MyNotification")
     let center = NotificationCenter.default
@@ -121,4 +123,34 @@ example(of: "Custom Subscriber") {
     let intSub = IntSubscriber()
     
     publisher.subscribe(intSub)
+}
+
+example(of: "Future") {
+    func futureIncrement(
+        integer: Int,
+        delay: TimeInterval
+    ) -> Future<Int, Never> {
+        return Future<Int, Never> { promise in
+            print("Start Future")
+            DispatchQueue.global().asyncAfter(deadline: .now() + delay) {
+                promise(.success(integer + 1))
+            }
+        }
+    }
+    
+    let future = futureIncrement(integer: 1, delay: 0)
+    
+    future
+        .sink(
+            receiveCompletion: { print("Completion: ", $0) },
+            receiveValue: { print("Value: ", $0) }
+        )
+        .store(in: &subscriptions)
+    
+    future
+        .sink(
+            receiveCompletion: { print("Second Completion: ", $0) },
+            receiveValue: { print("Second value: ", $0) }
+        )
+        .store(in: &subscriptions)
 }

@@ -154,3 +154,53 @@ example(of: "Future") {
         )
         .store(in: &subscriptions)
 }
+
+example(of: "PassthroughSubject") {
+    enum MyError: Error {
+        case test
+    }
+    
+    final class StringSubscriber: Subscriber {
+        
+        typealias Input = String
+        typealias Failure = MyError
+        
+        func receive(subscription: Subscription) {
+            subscription.request(.max(2))
+        }
+        
+        func receive(_ input: String) -> Subscribers.Demand {
+            print("Received value: ", input)
+            return input == "World" ? .max(1) : .none
+        }
+        
+        func receive(completion: Subscribers.Completion<MyError>) {
+            print("Received completion: ", completion)
+        }
+        
+    }
+    
+    let subscriber = StringSubscriber()
+    let subject = PassthroughSubject<String, MyError>()
+    
+    subject.subscribe(subscriber)
+    
+    let subscription = subject
+        .sink(
+            receiveCompletion: { completion in
+                print("Received completion (sink)", completion)
+            },
+            receiveValue: { value in
+                print("Received value (sink)", value)
+            }
+        )
+    
+    subject.send("Hello")
+    subject.send("World")
+    subscription.cancel()
+    subject.send("Still there?")
+    subject.send("Another") // omitted, because reached max request count, 2+1
+//    subject.send(completion: .failure(.test)) // this will also finish
+    subject.send(completion: .finished)
+    subject.send("Yet Another") // not reached
+}

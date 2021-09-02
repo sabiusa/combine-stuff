@@ -94,3 +94,31 @@ example(of: "assign(to:)") {
     
     print(obj.value)
 }
+
+example(of: "Custom Subscriber") {
+    let publisher = (1 ... 5).publisher
+    
+    final class IntSubscriber: Subscriber {
+        
+        typealias Input = Int
+        typealias Failure = Never
+        
+        func receive(subscription: Subscription) {
+            subscription.request(.max(3))
+        }
+        
+        func receive(_ input: Int) -> Subscribers.Demand {
+            print("Received value", input)
+            return .max(1) // increase by 1 every time value is received
+        }
+        
+        func receive(completion: Subscribers.Completion<Never>) {
+            print("Received completion")
+        }
+        
+    }
+    
+    let intSub = IntSubscriber()
+    
+    publisher.subscribe(intSub)
+}
